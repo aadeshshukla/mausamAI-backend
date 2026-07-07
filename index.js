@@ -166,6 +166,12 @@ async function callGroq(messages, { stream = false, onChunk = null } = {}) {
 // ---------- App setup ----------
 const app = express();
 
+// Render (and most PaaS hosts) sit behind a reverse proxy, so Express needs
+// to trust the X-Forwarded-For header to determine the real client IP.
+// '1' trusts only the first hop (the platform's own proxy) rather than any
+// arbitrary upstream, which is what express-rate-limit needs to key on IP safely.
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(
   cors({
